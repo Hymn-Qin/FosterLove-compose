@@ -1,22 +1,23 @@
 package com.example.foster.ui
 
 import android.os.Bundle
+import android.transition.Scene
 import androidx.annotation.MainThread
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.example.foster.ui.ScreenName.HOME
-import com.example.foster.ui.ScreenName.valueOf
+import com.example.foster.ui.ScreenName.*
 import com.example.foster.utils.getMutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-enum class ScreenName { HOME, }
+enum class ScreenName { HOME, DETAIL }
 
 sealed class Screen(val id: ScreenName) {
     object Home : Screen(HOME)
+    data class Detail(val palId: String) : Screen(DETAIL)
 }
 
 private fun Screen.toBundle(): Bundle {
@@ -29,6 +30,7 @@ private fun Bundle.toScreen(): Screen {
     val screenName = valueOf(getStringOrThrow(SIS_NAME))
     return when (screenName) {
         HOME -> Screen.Home
+        else -> Screen.Detail("")
     }
 }
 
@@ -52,7 +54,7 @@ class MainViewModel @Inject constructor(
     )
 
     @MainThread
-    fun onBack() : Boolean {
+    fun onBack(): Boolean {
         val wasHandle = currentScreen != Screen.Home
         currentScreen = Screen.Home
         return wasHandle
