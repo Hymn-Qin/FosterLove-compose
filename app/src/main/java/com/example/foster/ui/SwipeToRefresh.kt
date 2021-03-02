@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
-private val RefreshDistance = 180.dp
+private val RefreshDistance = 80.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -76,9 +76,9 @@ fun SwipeToRefreshLayout(
 private val <T> SwipeableState<T>.PreUpPostDownNestedScrollConnection: NestedScrollConnection
     get() = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            val delta = available.y
+            val delta = available.toFloat()
             return if (delta < 0 && source == NestedScrollSource.Drag) {
-                Offset(0f, performDrag(delta = delta))
+                performDrag(delta).toOffset()
             } else {
                 Offset.Zero
             }
@@ -89,19 +89,32 @@ private val <T> SwipeableState<T>.PreUpPostDownNestedScrollConnection: NestedScr
             available: Offset,
             source: NestedScrollSource
         ): Offset {
-            val delta = available.y
             return if (source == NestedScrollSource.Drag) {
-                Offset(0f, performDrag(delta = delta))
+                performDrag(available.toFloat()).toOffset()
             } else {
                 Offset.Zero
             }
         }
 
         override suspend fun onPreFling(available: Velocity): Velocity {
-            return super.onPreFling(available)
+            val toFling = Offset(available.x, available.y).toFloat()
+            return if (toFling < 0) {
+                performFling(velocity = toFling)
+                // since we go to the anchor with tween settling, consume all for the best UX
+                available
+            } else {
+                Velocity.Zero
+            }
         }
 
-        override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            return super.onPostFling(consumed, available)
+        override suspend fun onPostFling(
+            consumed: Velocity,
+            available: Velocity
+        ): Velocity {
+            performFling(velocity = Offset(available.x, available.y).toFloat())
+            return Velocity.Zero
         }
+        private fun Float.toOffset(): Offset = Offset(0f, this)
+
+        private fun Offset.toFloat(): Float = this.y
     }

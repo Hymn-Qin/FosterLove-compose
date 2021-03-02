@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.example.foster.data.post.PetPalsRepository
 import com.example.foster.ui.ScreenName.*
 import com.example.foster.utils.getMutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +44,8 @@ private const val SIS_POST = "post"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    val repository: PetPalsRepository
 ) : ViewModel() {
 
     var currentScreen: Screen by savedStateHandle.getMutableStateOf<Screen>(

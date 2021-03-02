@@ -3,29 +3,56 @@ package com.example.foster.ui.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.foster.R
 import com.example.foster.data.Result
+import com.example.foster.data.post.PetPalsRepository
 import com.example.foster.data.post.impl.BlockingFakePalsRepository
 import com.example.foster.model.PetPal
 import com.example.foster.ui.Screen
 import com.example.foster.ui.SwipeToRefreshLayout
 import com.example.foster.ui.ThemedPreview
 import com.example.foster.ui.state.UiState
+import com.example.foster.utils.produceUiState
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @Composable
 fun HomeScreen(
+    repository: PetPalsRepository,
     navigateTo: (Screen) -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
+    val (petPalsUiState, refreshPetPals, clearError) = produceUiState(repository) {
+        getPetPals()
+    }
+
+    val adoptPetPals by repository.observeAdoption().collectAsState(setOf())
+    val coroutineScope = rememberCoroutineScope()
+
+    HomeScreen(
+        petPal = petPalsUiState.value,
+        onRefreshPetPals = refreshPetPals,
+        onErrorDismiss = clearError,
+        navigateTo = navigateTo,
+        adoptPetPals = adoptPetPals,
+        onToggleAdopt = {
+            coroutineScope.launch { repository.toggleAdopt(it) }
+        },
+        scaffoldState = scaffoldState
+    )
+
 }
 
 @Composable
@@ -33,21 +60,46 @@ fun HomeScreen(
     // 请求的宠物伙伴列表
     petPal: UiState<List<PetPal>>,
     // 刷新宠物伙伴列表
-    onRefreshPosts: () -> Unit,
+    onRefreshPetPals: () -> Unit,
+    onErrorDismiss: () -> Unit,
     // 导航到其他屏幕
     navigateTo: (Screen) -> Unit,
     // 打开详情事件
-    onToggleDetails: (String) -> Unit,
+    adoptPetPals: Set<String>,
+    onToggleAdopt: (String) -> Unit,
     scaffoldState: ScaffoldState
 ) {
     // 显示一个错误
     if (petPal.hasError) {
+        val errorMessage = stringResource(id = R.string.load_error)
+        val retryMessage = stringResource(id = R.string.retry)
 
+        val onRefreshPostsState by rememberUpdatedState(onRefreshPetPals)
+        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
+
+        LaunchedEffect(scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessage,
+                actionLabel = retryMessage
+            )
+            when (snackbarResult) {
+                SnackbarResult.ActionPerformed -> onRefreshPostsState()
+                SnackbarResult.Dismissed -> onErrorDismissState()
+            }
+        }
     }
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.subtitle1,
+                        color = LocalContentColor.current
+                    )
+                }
+            )
         },
         content = { innerPadding ->
             val modifier = Modifier.padding(innerPadding)
@@ -58,14 +110,15 @@ fun HomeScreen(
                     FullScreenLoading()
                 },
                 loading = petPal.loading,
-                onRefresh = onRefreshPosts,
+                onRefresh = onRefreshPetPals,
                 content = {
                     // 主页
                     HomeScreenContent(
                         petPal = petPal,
-                        onRefresh = onRefreshPosts,
+                        onRefresh = onRefreshPetPals,
                         navigateTo = navigateTo,
-                        onToggleDetails = onToggleDetails,
+                        adoptPetPals = adoptPetPals,
+                        onToggleAdopt = onToggleAdopt,
                         modifier = modifier
                     )
 
@@ -94,8 +147,9 @@ private fun LoadingContent(
                 Surface(elevation = 10.dp, shape = CircleShape) {
                     CircularProgressIndicator(
                         modifier = Modifier
-                            .size(36.dp)
-                            .padding(6.dp)
+                            .size(40.dp)
+                            .padding(6.dp),
+                        strokeWidth = 4.dp
                     )
                 }
             },
@@ -110,12 +164,13 @@ private fun HomeScreenContent(
     petPal: UiState<List<PetPal>>,
     onRefresh: () -> Unit,
     navigateTo: (Screen) -> Unit,
-    onToggleDetails: (String) -> Unit,
+    adoptPetPals: Set<String>,
+    onToggleAdopt: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when {
         petPal.data != null -> {
-            PetPalList(petPals = petPal.data, navigateTo, onToggleDetails, modifier)
+            PetPalList(petPals = petPal.data, navigateTo, adoptPetPals,  onToggleAdopt, modifier)
         }
         !petPal.hasError -> {
             // 请求数据为空 提示刷新
@@ -135,19 +190,27 @@ private fun HomeScreenContent(
 fun PetPalList(
     petPals: List<PetPal>,
     navigateTo: (Screen) -> Unit,
-    onToggleDetails: (String) -> Unit,
+    adoptPetPals: Set<String>,
+    onToggleAdopt: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val top = petPals[(0..(petPals.size)).random()]
+    val top = petPals[0]
     val simple = petPals.subList(0, 2)
     val popular = petPals.subList(2, 7)
     val history = petPals.subList(7, 10)
 
     LazyColumn(modifier = modifier) {
         item { PetPalListTopSection(petPal = top, navigateTo = navigateTo) }
-        item {}
-        item {}
-        item {}
+        item {
+            PetPalListSimpleSection(
+                petPals = simple,
+                navigateTo = navigateTo,
+                adoptPetPals = adoptPetPals,
+                onToggleAdopt = onToggleAdopt
+            )
+        }
+        item { PetPalListPopularSection(petPals = popular, navigateTo = navigateTo) }
+        item { PetPalListHistorySection(petPals = history, navigateTo = navigateTo) }
     }
 }
 
@@ -162,10 +225,13 @@ private fun FullScreenLoading() {
     }
 }
 
+/**
+ * Home top
+ */
 @Composable
 private fun PetPalListTopSection(petPal: PetPal, navigateTo: (Screen) -> Unit) {
     Text(
-        text = "Top pal for you.",
+        text = "Top Pal For You",
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
         style = MaterialTheme.typography.subtitle1
     )
@@ -173,15 +239,74 @@ private fun PetPalListTopSection(petPal: PetPal, navigateTo: (Screen) -> Unit) {
         petPal = petPal,
         modifier = Modifier.clickable(onClick = { navigateTo(Screen.Detail(palId = petPal.id)) })
     )
+    PetPalListDivider()
 }
 
+@Composable
+private fun PetPalListSimpleSection(
+    petPals: List<PetPal>,
+    navigateTo: (Screen) -> Unit,
+    adoptPetPals: Set<String>,
+    onToggleAdopt: (String) -> Unit
+) {
+    Column {
+        petPals.forEach { petPal ->
+            PetPalCardSimple(
+                petPal = petPal,
+                navigateTo = navigateTo,
+                isAdopt = adoptPetPals.contains(petPal.id),
+                onToggleAdopt = { onToggleAdopt(petPal.id) }
+            )
+            PetPalListDivider()
+        }
+    }
+}
+
+@Composable
+private fun PetPalListPopularSection(petPals: List<PetPal>, navigateTo: (Screen) -> Unit) {
+    Column {
+        Text(
+            text = "Popular On Pat Pal",
+            style = MaterialTheme.typography.subtitle1,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        LazyRow(modifier = Modifier.padding(end = 16.dp)) {
+            items(petPals) { petPals ->
+                PetPalCardPopular(petPal = petPals, navigateTo = navigateTo)
+            }
+        }
+        PetPalListDivider()
+    }
+}
+
+@Composable
+private fun PetPalListHistorySection(petPals: List<PetPal>, navigateTo: (Screen) -> Unit) {
+    Column {
+        petPals.forEach { petPal ->
+            PetPalCardHistory(petPal = petPal, navigateTo = navigateTo)
+        }
+        PetPalListDivider()
+    }
+}
+
+@Composable
+private fun PetPalListDivider() {
+    Divider(
+        modifier = Modifier.padding(horizontal = 14.dp),
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.08f)
+    )
+}
+
+/**
+ * Home 组件预览
+ */
 @Preview("Home screen body preview.")
 @Composable
 fun PreviewHomeScreenBody() {
     ThemedPreview() {
         val post = loadFakePetPals()
-        PetPalList(petPals = post, navigateTo = { }, onToggleDetails = { })
-
+        PetPalList(petPals = post, navigateTo = { }, adoptPetPals = setOf() , onToggleAdopt = { })
     }
 }
 

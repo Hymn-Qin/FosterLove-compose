@@ -32,4 +32,10 @@ class MainActivity : AppCompatActivity() {
             FosterAppContent(viewModel = _viewModel)
         }
     }
+
+    override fun onBackPressed() {
+        if (!_viewModel.onBack()) {
+            super.onBackPressed()
+        }
+    }
 }

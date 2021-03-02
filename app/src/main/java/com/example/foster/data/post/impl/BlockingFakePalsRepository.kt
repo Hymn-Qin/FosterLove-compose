@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.foster.data.Result
 import com.example.foster.data.post.PetPalsRepository
 import com.example.foster.model.PetPal
+import kotlinx.coroutines.flow.Flow
 
 class BlockingFakePalsRepository(
     private val context: Context
@@ -14,6 +15,10 @@ class BlockingFakePalsRepository(
 
     override suspend fun getPetPals(): Result<List<PetPal>> {
         return Result.Success(PET_PALS)
+    }
+
+    override fun observeAdoption(): Flow<Set<String>> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun toggleAdopt(id: String) {

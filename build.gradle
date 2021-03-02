@@ -26,6 +26,12 @@ buildscript {
     ext.room_version       = '2.3.0-alpha03'
 
     repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+
+        maven{ url 'https://maven.aliyun.com/repository/google'}
         google()
         jcenter()
     }
@@ -43,6 +49,12 @@ plugins {
 
 subprojects {
     repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+
+        maven{ url 'https://maven.aliyun.com/repository/google'}
         google()
         jcenter()
     }
