@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-    id 'kotlin-parcelize'
 }
 
 android {
@@ -84,15 +83,6 @@ dependencies {
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_core_version"
     kapt "androidx.hilt:hilt-compiler:$hilt_version"
-
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
-
-//    testImplementation "androidx.arch.core:core-testing:$test_arch_version"
-
-    // startup
-    implementation "androidx.startup:startup-runtime:$startup_version"
 
     testImplementation 'junit:junit:4.13.2'
 

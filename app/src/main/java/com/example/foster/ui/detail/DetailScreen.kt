@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.foster.ui.detail
 
 import android.content.Context
@@ -15,10 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.foster.R
 import com.example.foster.data.post.PetPalsRepository
+import com.example.foster.data.post.impl.pal3
 import com.example.foster.model.PetPal
+import com.example.foster.ui.ThemedPreview
 import com.example.foster.ui.home.BookmarkButton
 import com.example.foster.utils.produceUiState
 import kotlinx.coroutines.launch
@@ -60,8 +79,18 @@ private fun DetailScreen(
     onToggleAdopt: () -> Unit
 ) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
+
     if (showDialog) {
-        FunctionalityNotAvailablePopup { showDialog = false }
+        FunctionalityNotAvailablePopup(
+            "Successful adoption \uD83D\uDC4F",
+            confirm = true,
+            onConfirm = {
+                showDialog = false
+            },
+            onDismiss = {
+                showDialog = false
+            }
+        )
     }
     Scaffold(
         topBar = {
@@ -69,7 +98,7 @@ private fun DetailScreen(
                 title = {
                     Text(
                         text = petPal.name,
-                        style = MaterialTheme.typography.subtitle2,
+                        style = MaterialTheme.typography.h6,
                         color = LocalContentColor.current
                     )
                 },
@@ -90,7 +119,20 @@ private fun DetailScreen(
         bottomBar = {
             BottomBar(
                 petPal = petPal,
-                onUnimplementedAction = { showDialog = true },
+                onUnimplementedAction = {
+//                    popup.confirm = false
+//                    popup.onConfirm = {  }
+//                    popup.text = "Functionality not available \uD83D\uDE48"
+                    showDialog = true
+                },
+                onAdoptAction = {
+//                    popup.confirm = true
+//                    popup.onConfirm = {
+//
+//                    }
+//                    popup.text = " Successful adoption \uD83D\uDC4F"
+                    showDialog = true
+                },
                 isAdopt = isAdopt,
                 onToggleAdopt = onToggleAdopt
             )
@@ -102,6 +144,7 @@ private fun DetailScreen(
 private fun BottomBar(
     petPal: PetPal,
     onUnimplementedAction: () -> Unit,
+    onAdoptAction: () -> Unit,
     isAdopt: Boolean,
     onToggleAdopt: () -> Unit
 ) {
@@ -112,7 +155,7 @@ private fun BottomBar(
                 .height(56.dp)
                 .fillMaxWidth()
         ) {
-            IconButton(onClick = onUnimplementedAction) {
+            IconButton(onClick = onAdoptAction) {
                 Icon(
                     imageVector = Icons.Filled.FavoriteBorder,
                     contentDescription = stringResource(R.string.cd_add_to_favorites)
@@ -141,16 +184,28 @@ private fun BottomBar(
 }
 
 @Composable
-private fun FunctionalityNotAvailablePopup(onDismiss: () -> Unit) {
+private fun FunctionalityNotAvailablePopup(
+    text: String,
+    confirm: Boolean = false,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         text = {
             Text(
-                text = "Functionality not available \uD83D\uDE48",
+                text = text,
                 style = MaterialTheme.typography.body2
             )
         },
         confirmButton = {
+            if (confirm) {
+                TextButton(onClick = onConfirm) {
+                    Text(text = "OK")
+                }
+            }
+        },
+        dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(text = "CLOSE")
             }
@@ -165,4 +220,26 @@ private fun sharePost(petPal: PetPal, context: Context) {
         putExtra(Intent.EXTRA_TEXT, petPal.breeds)
     }
     context.startActivity(Intent.createChooser(intent, "Share post"))
+}
+
+@Preview("Detail bottom bar")
+@Composable
+fun PreviewBottomBar() {
+    ThemedPreview {
+        BottomBar(
+            petPal = pal3,
+            onUnimplementedAction = { },
+            onAdoptAction = { },
+            isAdopt = false,
+            onToggleAdopt = { }
+        )
+    }
+}
+
+@Preview("Popup dialog")
+@Composable
+fun PreviewPopup() {
+    ThemedPreview {
+        FunctionalityNotAvailablePopup("Functionality not available \uD83D\uDE48", true, { }, { })
+    }
 }
