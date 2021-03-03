@@ -83,7 +83,6 @@ dependencies {
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_core_version"
     kapt "androidx.hilt:hilt-compiler:$hilt_version"
-
     testImplementation 'junit:junit:4.13.2'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

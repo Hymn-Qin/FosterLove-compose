@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui.state
 
-import java.lang.Exception
 import com.example.foster.data.Result
+import java.lang.Exception
 
 data class UiState<T>(
     val loading: Boolean = false,

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui.home
 
 import androidx.compose.foundation.Image
@@ -22,7 +21,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.*
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
+import androidx.compose.material.IconToggleButton
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -139,27 +144,27 @@ fun PetPalCardSimple(
 ) {
     val bookmarkAction = stringResource(if (isAdopt) R.string.unbookmark else R.string.bookmark)
 
-    Row(modifier = Modifier
-        .clickable(onClick = { navigateTo(Screen.Detail(petPal.id)) })
-        .padding(16.dp)
-        .semantics {
-            customActions = listOf(
-                CustomAccessibilityAction(
-                    label = bookmarkAction,
-                    action = {
-                        onToggleAdopt()
-                        true
-                    }
+    Row(
+        modifier = Modifier
+            .clickable(onClick = { navigateTo(Screen.Detail(petPal.id)) })
+            .padding(16.dp)
+            .semantics {
+                customActions = listOf(
+                    CustomAccessibilityAction(
+                        label = bookmarkAction,
+                        action = {
+                            onToggleAdopt()
+                            true
+                        }
+                    )
                 )
-            )
-        }
+            }
     ) {
         PetPalImage(petPal = petPal, modifier = Modifier.padding(end = 16.dp))
         Column(modifier = Modifier.weight(1f)) {
             PostTitle(petPal)
             // address
             SexAndAge(petPal)
-
         }
         BookmarkButton(
             isBookmarked = isAdopt,
@@ -177,7 +182,8 @@ fun SimplePetPalPreview() {
             petPal = pal3,
             navigateTo = { },
             isAdopt = false,
-            onToggleAdopt = { })
+            onToggleAdopt = { }
+        )
     }
 }
 
@@ -189,7 +195,8 @@ fun SimplePetPalDarkPreview() {
             petPal = pal3,
             navigateTo = { },
             isAdopt = false,
-            onToggleAdopt = { })
+            onToggleAdopt = { }
+        )
     }
 }
 
@@ -217,7 +224,6 @@ fun PetPalCardHistory(
                 petPal = petPal,
                 modifier = Modifier.padding(top = 4.dp)
             )
-
         }
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Icon(

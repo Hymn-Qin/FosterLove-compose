@@ -13,17 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarResult
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -68,7 +88,6 @@ fun HomeScreen(
         },
         scaffoldState = scaffoldState
     )
-
 }
 
 @Composable
@@ -137,7 +156,6 @@ fun HomeScreen(
                         onToggleAdopt = onToggleAdopt,
                         modifier = modifier
                     )
-
                 }
             )
         }
@@ -172,7 +190,6 @@ private fun LoadingContent(
             content = content,
         )
     }
-
 }
 
 @Composable
@@ -186,7 +203,7 @@ private fun HomeScreenContent(
 ) {
     when {
         petPal.data != null -> {
-            PetPalList(petPals = petPal.data, navigateTo, adoptPetPals,  onToggleAdopt, modifier)
+            PetPalList(petPals = petPal.data, navigateTo, adoptPetPals, onToggleAdopt, modifier)
         }
         !petPal.hasError -> {
             // 请求数据为空 提示刷新
@@ -322,7 +339,7 @@ private fun PetPalListDivider() {
 fun PreviewHomeScreenBody() {
     ThemedPreview() {
         val post = loadFakePetPals()
-        PetPalList(petPals = post, navigateTo = { }, adoptPetPals = setOf() , onToggleAdopt = { })
+        PetPalList(petPals = post, navigateTo = { }, adoptPetPals = setOf(), onToggleAdopt = { })
     }
 }
 

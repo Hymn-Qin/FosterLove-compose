@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui
 
 import android.os.Bundle
-import android.transition.Scene
 import androidx.annotation.MainThread
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -25,7 +23,9 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.foster.data.post.PetPalsRepository
-import com.example.foster.ui.ScreenName.*
+import com.example.foster.ui.ScreenName.DETAIL
+import com.example.foster.ui.ScreenName.HOME
+import com.example.foster.ui.ScreenName.valueOf
 import com.example.foster.utils.getMutableStateOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

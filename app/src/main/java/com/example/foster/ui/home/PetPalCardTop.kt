@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui.home
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -50,7 +54,7 @@ fun PetPalCardTop(petPal: PetPal, modifier: Modifier = Modifier) {
             modifier = imageModifier,
             contentScale = ContentScale.Crop
         )
-        //间隙
+        // 间隙
         Spacer(Modifier.height(16.dp))
 
         Text(

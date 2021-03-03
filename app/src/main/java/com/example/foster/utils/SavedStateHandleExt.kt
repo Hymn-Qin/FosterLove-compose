@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.utils
 
 import android.os.Bundle
@@ -22,7 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 
 fun <T> SavedStateHandle.getMutableStateOf(
-    key:String,
+    key: String,
     default: T,
     save: (T) -> Bundle,
     restore: (Bundle) -> T

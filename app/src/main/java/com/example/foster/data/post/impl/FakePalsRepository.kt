@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.data.post.impl
 
 import com.example.foster.data.Result
@@ -28,9 +27,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class FakePalsRepository @Inject constructor(
-
-) : PetPalsRepository {
+class FakePalsRepository @Inject constructor() : PetPalsRepository {
 
     private val adoptPetPals = MutableStateFlow<Set<String>>(setOf())
 
@@ -55,11 +52,10 @@ class FakePalsRepository @Inject constructor(
             } else {
                 Result.Success(PET_PALS)
             }
-
         }
     }
 
-    override fun observeAdoption(): Flow<Set<String>>  = adoptPetPals
+    override fun observeAdoption(): Flow<Set<String>> = adoptPetPals
 
     override suspend fun toggleAdopt(id: String) {
         // 加锁

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.foster.ui
 
 import androidx.compose.animation.Crossfade
@@ -29,7 +28,7 @@ import com.example.foster.ui.theme.FosterTheme
 fun FosterApp(viewModel: MainViewModel) {
     Crossfade(targetState = viewModel.currentScreen) { screen ->
         Surface(color = MaterialTheme.colors.background) {
-            when(screen) {
+            when (screen) {
                 is Screen.Home -> HomeScreen(
                     repository = viewModel.repository,
                     navigateTo = viewModel::navigateTo
@@ -38,11 +37,10 @@ fun FosterApp(viewModel: MainViewModel) {
                     id = screen.palId,
                     repository = viewModel.repository,
                     onBack = { viewModel.onBack() },
-                   )
+                )
             }
         }
     }
-
 }
 
 @Composable
